@@ -80,6 +80,13 @@ export CLUSTER_ZONE=asia-northeast1-c
 
 ※ [選択できるリージョンとゾーン](https://cloud.google.com/compute/docs/regions-zones/#available)
 
+つぎのコマンドを実行してデフォルトのGCPプロジェクトIDをセットしてください。
+
+```shell
+$ gcloud config set project $PROJECT_ID
+```
+
+
 つぎのコマンドを実行してGKEとGCRを有効化してください。
 
 ```shell
@@ -146,6 +153,14 @@ $ kubectl get pods --namespace knative-eventing
 $ kubectl get pods --namespace knative-monitoring
 ```
 
+EventingでKnativeのServiceをsinkに指定する場合は現状追加でセットアップが必要です。本ワークショップをEventing含めて実施する場合はつぎのコマンドを実行してください。
+
+```
+$ kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.2.7/istio-knative-extras.yaml
+```
+
+cf. [issue#1973](https://github.com/knative/eventing/issues/1973)
+
 #### Tekton
 
 つぎのコマンドを実行してTektonをインストールしてください。
@@ -164,7 +179,7 @@ $ kubectl get pods --namespace tekton-pipelines
 
 ## Serving
 
-Servingの責務はオートスケールアップ・ダウン、トラフィックコントロール、バージョン管理などです。Servingは4つのコンポーネント（CRD）から構成されます。
+Servingの責務はオートスケールアップ・ダウン、トラフィックコントロール、バージョン管理などです。Servingは4つのコンポーネントから構成されます。
 
  * Configuration: 最新の設定
  * Revision: コードと設定の履歴
@@ -511,7 +526,7 @@ spec:
 変更後に適用してください。
 
 ```
-kubectl apply --filename blue-green-route.yaml
+$ kubectl apply --filename blue-green-route.yaml
 ```
 
 greenとblueに50%ずつトラフィックが流れます。何度かアクセスして確認してみてください。
@@ -533,3 +548,195 @@ $ kubectl delete --filename blue-green-route.yaml
 #### 参考
 
 * [Istioのトラフィック管理](https://istio.io/docs/concepts/traffic-management/)
+
+## Eventing
+
+Eventingの責務はイベントのバインディングとデリバリーです。つぎのコンポーネント（CRD）を通じてイベントドリブンなアーキテクチャを実現します。
+
+ * Souces: イベントソース。「Souces」という名前のCRDがあるのではなく、種類ごとに独立したCRDになっている。
+ * Broker: イベントを受け取り、フィルタリングされたものをService（subscriber）に渡す
+ * Trigger: subscriberにわたすイベントのフィルター
+
+つぎの図をイメージしながら進めてください。
+
+***********
+図を足す
+***********
+
+### Hello World
+
+最初はイベントソースを`CronJobSource`とするシンプルな例を見てみましょう。`CronJobSource`で発生したイベントはKnativeの`Service`で受け取ります。
+
+まず、イベントを受け取る`Service`を準備します。つぎのマニフェストを`event-display-service.yaml`という名前で保存してください。
+
+```yaml
+apiVersion: serving.knative.dev/v1alpha1
+kind: Service
+metadata:
+  name: event-display
+spec:
+  template:
+    spec:
+      containers:
+        - image: gcr.io/knative-releases/github.com/knative/eventing-sources/cmd/event_display
+
+```
+
+つぎのコマンドでマニフェストを適用してください。
+
+```shell
+$ kubectl apply --filename event-display-service.yaml
+```
+
+今度は`CronJobSource`を準備します。つぎのマニフェストを`cronjob-source.yaml`という名前で保存してください。
+
+```yaml
+apiVersion: sources.eventing.knative.dev/v1alpha1
+kind: CronJobSource
+metadata:
+  name: cronjob-source
+spec:
+  schedule: "*/1 * * * *"
+  data: '{"message": "Hello Eventing!"}'
+  sink:
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: event-display
+```
+
+つぎのコマンドでマニフェストを適用してください。
+
+```shell
+$ kubectl apply --filename cronjob-source.yaml
+```
+
+`CronJobSource`はspec.scheduleに記述したクロン式に従ってイベントを発行します。この例では1分毎にHello Eventing!というメッセージを発行します。
+
+KnativeのServiceで受信したメッセージはコンテナのログで確認できます。つぎのコマンドを実行してメッセージを確認してください。
+
+```shell
+$ kubectl logs -l serving.knative.dev/service=event-display -c user-container
+```
+
+確認ができたらいったん登録した`Service`、`CronJobSource`を削除してください。
+
+```shell
+$ kubectl delete --filename event-display-service.yaml
+$ kubectl delete --filename cronjob-source.yaml
+```
+
+#### 参考
+
+* 実行したアプリケーションのソースコード
+  * [event_display](https://github.com/knative/eventing-contrib/blob/master/cmd/event_display/main.go)
+* Eventing v0.9でKnative Servingを利用するにあたりcluster local gatewayを別途セットアップしなければならない件
+  * [Cluster local issue with Knative Eventing v0.9.0](https://medium.com/google-cloud/cluster-local-issue-with-knative-eventing-v0-9-0-a1fee2215cfe)
+  * https://github.com/knative/eventing/issues/1973
+
+### PubSub
+
+今度はCloud PubSubのイベントを処理してみましょう。
+
+まずGCP Cloud Pub/Subをイベントソースとするためにつぎのコマンドを実行してください。
+
+```shell
+$ kubectl apply -f https://github.com/google/knative-gcp/releases/download/v0.9.0/cloud-run-events.yaml
+```
+
+利用しているGCPプロジェクトでCloud Pub/Sub APIを有効化してください。
+
+```shell
+$ gcloud services enable pubsub.googleapis.com
+```
+
+GCPのサービスアカウントを準備します。つぎのコマンドを実行して新しくサービスアカウントを作成してください。
+
+```shell
+$ gcloud iam service-accounts create cloudrunevents-pullsub
+Created service account [cloudrunevents-pullsub]
+```
+
+作成したサービスアカウントにPub/Sub Editorロールを付与してください。
+
+```shell
+$ gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member=serviceAccount:cloudrunevents-pullsub@$PROJECT_ID.iam.gserviceaccount.com \
+  --role roles/pubsub.editor
+```
+
+サービスアカウントの秘密鍵をJSON形式でダウンロードしてください。
+
+```shell
+$ gcloud iam service-accounts keys create cloudrunevents-pullsub.json \
+--iam-account=cloudrunevents-pullsub@$PROJECT_ID.iam.gserviceaccount.com
+```
+
+JSONファイルからKubernetesの`Secret`オブジェクトを作成してください。
+
+```shell
+$ kubectl --namespace default create secret generic google-cloud-key --from-file=key.json=cloudrunevents-pullsub.json
+```
+
+`Secret`はgoogle-cloud-keyという名前で参照します。
+
+```shell
+$ kubectl get secret
+```
+
+PubSubのトピックを作成してください。
+
+```shell
+$ export TOPIC_NAME=testing
+$ gcloud pubsub topics create $TOPIC_NAME
+```
+
+イベントを処理する`Service`を作成してください。CronJobの例と同じくevent-display-serviceです。
+
+```shell
+$ kubectl apply --filename event-display-service.yaml
+```
+
+つぎのマニフェストを`pullsubscription.yaml`という名前で保存し、適用してください。specにはPubSubのtopic名とイベントの送信先を記述しています。
+
+```yaml
+apiVersion: pubsub.cloud.run/v1alpha1
+kind: PullSubscription
+metadata:
+  name: testing-source-event-display
+spec:
+  topic: testing
+  sink:
+    apiVersion: serving.knative.dev/v1alpha1
+    kind: Service
+    name: event-display
+```
+
+```shell
+$ kubectl apply -f pullsubscription.yaml
+```
+
+PubSubのトピックにイベントを発行してください。メッセージはなんでも大丈夫です。
+
+```
+$ gcloud pubsub topics publish testing --message="Hello PubSub"
+```
+
+KnativeのServiceで受信したメッセージはコンテナのログで確認できます。つぎのコマンドを実行してメッセージを確認してください。
+
+```shell
+$ kubectl logs -l serving.knative.dev/service=event-display -c user-container
+```
+
+確認ができたらいったん登録した`Service`、`PullSubscription`を削除してください。
+
+```shell
+$ kubectl delete --filename event-display-service.yaml
+$ kubectl delete --filename pullsubscription.yaml
+```
+
+#### 参考
+
+* [Eventingのその他のサンプル](https://github.com/knative/docs/tree/master/docs/eventing/samples)
+  * `Broker`や`Trigger`を利用するサンプルもあります
+* [利用できるイベントソース(https://github.com/knative/docs/blob/master/docs/eventing/sources/README.md)
+* [cloudeventsとは](https://github.com/cloudevents/spec/blob/master/spec.md#design-goals)
