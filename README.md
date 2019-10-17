@@ -553,9 +553,9 @@ $ kubectl delete --filename blue-green-route.yaml
 
 Eventingの責務はイベントのバインディングとデリバリーです。つぎのコンポーネント（CRD）を通じてイベントドリブンなアーキテクチャを実現します。
 
- * Souces: イベントソース。「Souces」という名前のCRDがあるのではなく、種類ごとに独立したCRDになっている。
- * Broker: イベントを受け取り、フィルタリングされたものをService（subscriber）に渡す
- * Trigger: subscriberにわたすイベントのフィルター
+* Souces: イベントソース。「Souces」という名前のCRDがあるのではなく、種類ごとに独立したCRDになっている。
+* Broker: イベントを受け取り、フィルタリングされたものをService（subscriber）に渡す
+* Trigger: subscriberにわたすイベントのフィルター
 
 つぎの図をイメージしながら進めてください。
 
@@ -738,5 +738,110 @@ $ kubectl delete --filename pullsubscription.yaml
 
 * [Eventingのその他のサンプル](https://github.com/knative/docs/tree/master/docs/eventing/samples)
   * `Broker`や`Trigger`を利用するサンプルもあります
-* [利用できるイベントソース(https://github.com/knative/docs/blob/master/docs/eventing/sources/README.md)
+* [利用できるイベントソース](https://github.com/knative/docs/blob/master/docs/eventing/sources/README.md)
 * [cloudeventsとは](https://github.com/cloudevents/spec/blob/master/spec.md#design-goals)
+
+## Tekton
+
+Tektonの責務はKubernetes上で　CI/CDパイプラインを構築、実行することです。KnativeのBuildコンポーネントを強化する形で始まりましたが、Buildはv0.7を最後に開発が終了しTektonに引き継がれました。
+
+* Task: 「コンテナイメージをビルドする」「Kubernetes上にデプロイする」などの粒度のタスクを表現したオブジェクトです。タスクは1つ以上のstepから構成され、それぞれがコンテナで実行されます。自分で書くことも、[すでに準備されたもの](https://github.com/tektoncd/catalog)を選んで利用することもできます。
+* TaskRun: Taskを実行するオブジェクトです。Taskがテンプレートとすると、それに具体的な値を与える実体です。
+* PipelineResource: タスクで利用する入出力です。
+* Pipeline: Taskを構成要素とするCI/CDパイプライン全体を表現するオブジェクトです。
+* PipelineRun: Pipelineを実行するオブジェクトです。Pipelineがテンプレートとすると、それに具体的な値を与える実体です。TaskRunを作成してここのTaskを実行していきます。
+
+つぎの図をイメージしながら進めてください。
+
+### Hello World
+
+[kaniko](https://github.com/GoogleContainerTools/kaniko)を利用した`Task`を使ってコンテナイメージをビルドしてレジストリにプッシュしてみましょう。
+
+まず、kaniko `Task`を利用できるようにするためにつぎのコマンドを実行してください。
+
+```
+$ kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/kaniko/kaniko.yaml
+```
+
+kaniko `Task`するにあたっては`TaskRun`で2つのパラメタを設定する必要があります。
+
+* DOCKERFILE: Dockerfileへのパスです。デフォルトは`./Dockerfile`
+* CONTEXT: Dockerの[ビルドコンテキスト](https://docs.docker.com/engine/reference/commandline/build/)です。デフォルトは`./`
+
+ビルドの対象とするアプリケーションはhelloworld-goです。knative/docsリポジトリにソースコードがあるのでこれをビルドし、今利用しているGCPプロジェクトのGCRにプッシュします。
+
+GCRのパスをご自身のGCPプロジェクトのPROJECT_IDに変更し、`taskrun-build-kaniko-helloworld-gcr.yaml`というファイル名で保存し、適用してください。
+
+```yaml
+apiVersion: tekton.dev/v1alpha1
+kind: TaskRun
+metadata:
+  name: build-kaniko-helloworld-gcr
+spec:
+  taskRef:
+    name: kaniko
+  inputs:
+    resources:
+    - name: source
+      resourceSpec:
+        type: git
+        params:
+        - name: url
+          value: https://github.com/knative/docs
+    params:
+    - name: DOCKERFILE
+      value: Dockerfile
+    - name: CONTEXT
+      value: docs/serving/samples/hello-world/helloworld-go/
+  outputs:
+    resources:
+    - name: image
+      resourceSpec:
+        type: image
+        params:
+        - name: url
+          # ご自身のGCPプロジェクトIDに置き換えてください
+          value: gcr.io/<your-project-id>/helloworld-go:latest
+```
+
+```shell
+$ kubectl apply -f taskrun-build-kaniko-helloworld-gcr.yaml
+```
+
+つぎのコマンドを実行してビルド&プッシュを見守ってください。
+
+```shell
+$ kubectl get po -w
+build-kaniko-helloworld-gcr-pod-e686b3   0/4     Init:3/4          0    5s
+build-kaniko-helloworld-gcr-pod-e686b3   0/4     PodInitializing   0    6s
+build-kaniko-helloworld-gcr-pod-e686b3   4/4     Running           0    8s
+build-kaniko-helloworld-gcr-pod-e686b3   4/4     Running           0    8s
+build-kaniko-helloworld-gcr-pod-e686b3   3/4     Running           0    11s
+build-kaniko-helloworld-gcr-pod-e686b3   2/4     Running           0    16s
+build-kaniko-helloworld-gcr-pod-e686b3   0/4     Completed         0    78s
+```
+
+つぎのコマンドを実行してGCRにイメージがプッシュされているか確認してください。
+
+```shell
+$ gcloud container images list-tags gcr.io/$PROJECT_ID/helloworld-go
+```
+
+`kubectl logs build-kaniko-helloworld-gcr-pod-e686b3`を実行するとPodで複数のコンテナが動いていることが確認できます。`-c`オプションでそれぞれのコンテナを指定するとコンテナのログも確認できます。
+
+確認ができたらいったん登録した`Task`、`TaskRun`を削除してください。
+
+```shell
+$ kubectl delete -f taskrun-build-kaniko-helloworld-gcr.yaml
+$ kubectl delete -f https://raw.githubusercontent.com/tektoncd/catalog/master/kaniko/kaniko.yaml
+```
+
+#### 参考
+
+* [kaniko Taskのマニフェスト](https://github.com/tektoncd/catalog/blob/master/kaniko/kaniko.yaml)
+* [Tekton Catalog](https://github.com/tektoncd/catalog)にはすでにたくさんのカタログが用意されています。
+  * アプリケーションのリント、テスト、ビルド
+  * コンテナイメージのビルド
+  * Kubenetesやクラウドとやりとりするためのコマンド
+* [Pipelineを含むサンプル](https://github.com/tektoncd/pipeline/blob/master/docs/tutorial.md#pipeline)
+
