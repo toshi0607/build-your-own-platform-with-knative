@@ -1172,3 +1172,15 @@ https://console.cloud.google.com/run/detail/asia-northeast1/helloworld-go/metric
 * [Cloud Run、Cloud Run for Anthosの機能比較](https://cloud.google.com/run#choose-the-platform-that-fits-you)
 * [Cloud Run on GKEに覗くKnative](https://qiita.com/toshi0607/items/eeeabe81b1beac343b6b)
 * [Anthos](https://cloud.google.com/anthos/)
+
+## 参考
+
+* [Knative公式ドキュメント](https://knative.dev/)
+  * [サンプル](https://knative.dev/docs/samples/)
+* [Tekton公式ドキュメント](https://github.com/tektoncd/pipeline/tree/master/docs)
+* Knativeの実装とKubernetesとの関係を知りたい
+  * [Knativeソースコードリーディング入門　Knativeで学ぶKubernetesのカスタムリソースとカスタムコントローラー](https://booth.pm/ja/items/1568456)
+* 俺の本を読んでくれ！！！
+  * [Knativeの歩き方 KubernetesからServerlessを訪ねて 第2版](https://booth.pm/ja/items/1309468)
+* Knative Tutorial
+  * https://github.com/meteatamel/knative-tutorial
