@@ -2,9 +2,9 @@
 
 ## Kubernetes
 
-本ハンズオンは基本的にGCPを利用します。Google Cloud Shell上でコマンドを実行し、Google Kubernetes Engine（GKE）上にKubernetesクラスタを準備します。
+本ワークショップでは基本的にGCPを利用します。Google Cloud Shell上でコマンドを実行し、Google Kubernetes Engine（GKE）上にKubernetesクラスタを準備します。
 
-ローカル環境のターミナルからローカル環境にKubernetesクラスタを構築することももちろん可能です。しかし、本ハンズオンでは準備を容易にし、Knativeを学ぶことに一層集中していただくためにCloud ShellとGKEの利用を推奨します。
+ローカル環境のターミナルからローカル環境にKubernetesクラスタを構築することももちろん可能です。しかし、本ワークショップでは準備を容易にし、Knativeを学ぶことに一層集中していただくためにCloud ShellとGKEの利用を推奨します。
 
 つぎの環境を準備していきます。
 
@@ -27,7 +27,7 @@ https://cloud.google.com/free/docs/frequently-asked-questions?hl=ja
 
 ### GCPプロジェクト
 
-GKEでKubernetesクラスタを構築するプロジェクトを作成します。本ハンズオン用に利用できるプロジェクトがすでにある場合はスキップして大丈夫です。
+GKEでKubernetesクラスタを構築するプロジェクトを作成します。本ワークショップ用に利用できるプロジェクトがすでにある場合はスキップして大丈夫です。
 
 ダッシュボードで*作成*をクリックしてください。
 
@@ -97,13 +97,17 @@ $ gcloud services enable \
 ```shell
 $ gcloud beta container clusters create $CLUSTER_NAME \
   --addons=HorizontalPodAutoscaling,HttpLoadBalancing,Istio \
-  --machine-type=n1-standard-4 \
+  --machine-type=n1-standard-2 \
   --cluster-version=latest --zone=$CLUSTER_ZONE \
   --enable-stackdriver-kubernetes --enable-ip-alias \
   --enable-autoscaling --min-nodes=1 --max-nodes=5 \
   --enable-autorepair \
   --scopes cloud-platform
 ```
+
+作成には少し時間がかかります。つぎのURLから作成状況が確認できます。
+
+https://console.cloud.google.com/kubernetes/list
 
 つぎのコマンドを実行して現在のユーザーにcluster-adminロールを付与してください。
 
@@ -112,10 +116,6 @@ $ kubectl create clusterrolebinding cluster-admin-binding \
   --clusterrole=cluster-admin \
   --user=$(gcloud config get-value core/account)
 ```
-
-作成には少し時間がかかります。つぎのURLから作成状況が確認できます。
-
-https://console.cloud.google.com/kubernetes/list
 
 つぎのコマンドを実行してノードの準備ができていることを確認してください。
 
@@ -153,6 +153,13 @@ EventingでKnativeのServiceをsinkに指定する場合は現状追加でセッ
 
 ```
 $ kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.2.7/istio-knative-extras.yaml
+
+# Istioのバージョン確認
+# $ kubectl get pod -n istio-system
+# istio-ingressgateway-f659695c4-sssrs
+# $ kubectl get pod istio-ingressgateway-f659695c4-sssrs -n istio-system -oyaml | grep image
+# image: gke.gcr.io/istio/proxyv2:1.1.13-gke.0
+# => OK: 1.2.7, NG: 1.3.3
 ```
 
 cf. [issue#1973](https://github.com/knative/eventing/issues/1973)

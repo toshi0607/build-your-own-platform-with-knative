@@ -4,9 +4,6 @@
 
 セットアップが済んだらKnariveで構築するFaaSプラットフォームの事例としてプラットフォーム利用者観点で見ていきましょう。
 
-https://github.com/triggermesh/tm
-https://github.com/triggermesh/knative-lambda-runtime/blob/master/go-1.x/runtime.yaml
-
 KLRは`tm`というコマンドで操作します。つぎのコマンドを実行して`tm`をインストールしてください。
 
 ```shell
@@ -28,7 +25,7 @@ $ tm set registry-auth gcr-image-puller
 # Password: <gcloud auth print-access-tokenを実行して得られる値>
 ```
 
-いよいよfuncionをデプロイします。つぎのファイルを`main.go`という名前で保存し、`tm`コマンドを実行してデプロイしてください。
+いよいよfuncionをデプロイします。つぎのファイルを`klr`というフォルダの下に`main.go`という名前で保存し、`tm`コマンドを実行してデプロイしてください。
 
 ```go
 package main
@@ -36,6 +33,7 @@ package main
 import (
         "fmt"
         "context"
+
         "github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -53,7 +51,7 @@ func main() {
 ```
 
 ```shell
-$ tm deploy service go-lambda -f . --build-template knative-go-runtime --registry-secret gcr-image-puller --wait
+$ tm deploy service go-lambda -f ./klr --build-template knative-go-runtime --registry-secret gcr-image-puller --wait
 Uploading "." to go-lambda-q7dzp-pod-7881a3
 Waiting for taskrun "go-lambda-q7dzp" ready state
 Waiting for service "go-lambda" ready state
@@ -63,8 +61,8 @@ Service go-lambda URL: http://go-lambda.default.example.com
 つぎのコマンドでfunctionが実行されるのを確認してください。
 
 ```shell
-# export KNATIVE_INGRESS=$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
-$ curl -H "Host: go-lambda.default.example.com" http://$KNATIVE_INGRESS --data '{"Name": "Foo"}'
+# export IP_ADDRESS=$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
+$ curl -H "Host: go-lambda.default.example.com" http://$IP_ADDRESS --data '{"Name": "Foo"}'
 ```
 
 ## 参考

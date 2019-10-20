@@ -233,7 +233,7 @@ $ kubectl get configurations blue-green-demo -o=jsonpath='{.status.latestCreated
 blue-green-demo-66h62 # 人によって異なります。
 ```
 
-つぎのマニフェストを`blue-green-route.yaml`という名前で保存してください。`spec.traffic[0].revisionName`は上で取得したもので置き換えが必要です。
+つぎのマニフェストを`blue-green-route.yaml`という名前で保存し、適用してください。`spec.traffic[0].revisionName`は上で取得したもので置き換えが必要です。
 
 ```yaml
 apiVersion: serving.knative.dev/v1alpha1
@@ -246,6 +246,10 @@ spec:
     - revisionName: blue-green-demo-66h62 # 取得したRevision名に置き換える
       percent: 100
 
+```
+
+```shell
+$ kubectl apply --filename blue-green-route.yaml
 ```
 
 アクセスしてみると、何度リクエストしても`Hello blue!`が出力されすはずです。
@@ -294,7 +298,7 @@ blue-green-demo-zdjbc # 人によって異なります。
 
 新しく作成したRevisionへアクセスできるようにしてみましょう。
 
-`blue-green-route.yaml`をつぎのように変更して保存してください。
+`blue-green-route.yaml`をつぎのように変更して保存し、適用てください。
 
 ```yaml
 apiVersion: serving.knative.dev/v1alpha1
@@ -311,9 +315,13 @@ spec:
       tag: v2
 ```
 
+```shell
+$ kubectl apply --filename blue-green-route.yaml
+```
+
 現在はまだ先に作ったgreenに100%のトラフィックが流れている状態です。
 
-```
+```shell
 $ curl -H "Host: blue-green-demo.default.example.com" http://${IP_ADDRESS}
 Hello blue!
 ```
@@ -380,9 +388,7 @@ Eventingの責務はイベントのバインディングとデリバリーです
 
 つぎの図をイメージしながら進めてください。
 
-***********
-図を足す
-***********
+![](./images/eventing.png)
 
 ## Hello World
 
@@ -456,7 +462,7 @@ $ kubectl delete --filename cronjob-source.yaml
 
 ## PubSub
 
-今度はCloud PubSubのイベントを処理してみましょう。
+今度は[Cloud Pub/Sub](https://cloud.google.com/pubsub/)のイベントを処理してみましょう。
 
 まずGCP Cloud Pub/Subをイベントソースとするためにつぎのコマンドを実行してください。
 
@@ -474,7 +480,6 @@ GCPのサービスアカウントを準備します。つぎのコマンドを�
 
 ```shell
 $ gcloud iam service-accounts create cloudrunevents-pullsub
-Created service account [cloudrunevents-pullsub]
 ```
 
 作成したサービスアカウントにPub/Sub Editorロールを付与してください。
@@ -534,6 +539,8 @@ spec:
 
 ```shell
 $ kubectl apply -f pullsubscription.yaml
+# 少し時間がかかるので注意
+$ kubectl get pullsubscription -w
 ```
 
 PubSubのトピックにイベントを発行してください。メッセージはなんでも大丈夫です。
@@ -648,7 +655,7 @@ build-kaniko-helloworld-gcr-pod-e686b3   0/4     Completed         0    78s
 $ gcloud container images list-tags gcr.io/$PROJECT_ID/helloworld-go
 ```
 
-`kubectl logs build-kaniko-helloworld-gcr-pod-e686b3`を実行するとPodで複数のコンテナが動いていることが確認できます。`-c`オプションでそれぞれのコンテナを指定するとコンテナのログも確認できます。
+`kubectl logs build-kaniko-helloworld-gcr-pod-e686b3`（人によってe686b3の部分は異なります）を実行するとPodで複数のコンテナが動いていることが確認できます。`-c`オプションでそれぞれのコンテナを指定するとコンテナのログも確認できます。
 
 確認ができたらいったん登録した`Task`、`TaskRun`を削除してください。
 
