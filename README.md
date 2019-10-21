@@ -16,4 +16,4 @@
 | 2 | [Knativeベースのプラットフォーム利用](step2.md) | 開発者 |
 | 3 | [DIY FaaS Platform](step3.md) | プラットフォーム |
 | 4 | [Knativeベースのマネージドサービス利用](step4.md) | 開発者 |
-| 5 | [参考情報](step5.md) | - |
+| 5 | [後片付けと参考情報](step5.md) | - |
