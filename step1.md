@@ -10,6 +10,8 @@ Servingの責務はオートスケールアップ・ダウン、トラフィッ�
 つぎの図をイメージしながら進めてください。
 
 ![](./images/serving.png)
+https://github.com/knative/docs/tree/master/docs/serving
+
 
 ## Hello World
 
@@ -17,7 +19,7 @@ Servingの責務はオートスケールアップ・ダウン、トラフィッ�
 
 Cloud Shellでワークスペースを作成し、つぎのマニフェストを`service.yaml`という名前で保存してください。
 
-```
+```shell
 $ mkdir knative-workshop
 $ cd knative-workshop
 $ touch service.yaml
@@ -44,7 +46,7 @@ spec:
 
 つぎのコマンドでマニフェストを適用してください。
 
-```
+```shell
 # マニフェストファイルの適用
 $ kubectl apply -f service.yaml
 service.serving.knative.dev/helloworld created
@@ -57,7 +59,7 @@ $ kubectl get ksvc,configuration,route
 
 アプリケーションにアクセスしてみてください。
 
-```
+```shell
 # IPアドレスの取得
 $ export IP_ADDRESS=$(kubectl get svc istio-ingressgateway --namespace istio-system --output 'jsonpath={.status.loadBalancer.ingress[0].ip}')
 
@@ -68,7 +70,7 @@ Hello Knative serving!
 
 KnativeのKubernetesオブジェクトだけでなく、組み込みのKubernetesオブジェクトも動いているのが確認できます。
 
-```
+```shell
 $ kubectl get pod,replicaset,deployment,service
 ```
 
@@ -82,7 +84,7 @@ Service、Deployment、ReplicaSet、Podオブジェクトが作成されてい�
 
 確認ができたらいったん登録したKnativeのServiceを削除してください。
 
-```
+```shell
 $ kubectl delete -f service.yaml
 ```
 
@@ -143,7 +145,7 @@ spec:
 
 つぎのコマンドでマニフェストを適用してください。
 
-```
+```shell
 # マニフェストファイルの適用
 $ kubectl apply -f autoscale-go.yaml
 service.serving.knative.dev/autoscale-go created
@@ -154,7 +156,7 @@ $ kubectl get ksvc,configuration,route
 
 heyコマンドを利用して負荷をかけてみてください。
 
-```
+```shell
 # 30秒間50並列リクエスト
 $ hey -z 30s -c 50 \
   -host "autoscale-go.default.example.com" \
@@ -164,7 +166,7 @@ $ hey -z 30s -c 50 \
 
 オートスケールの様子を[Grafana](https://grafana.com/)を使って確認してみましょう。
 
-```
+```shell
 $ kubectl port-forward --namespace knative-monitoring $(kubectl get pods --namespace knative-monitoring --selector=app=grafana  --output=jsonpath="{.items..metadata.name}") 8080:3000
 ```
 
@@ -178,7 +180,7 @@ $ kubectl port-forward --namespace knative-monitoring $(kubectl get pods --names
 
 確認ができたらいったん登録したKnativeのServiceを削除してください。
 
-```
+```shell
 $ kubectl delete -f autoscale-go.yaml
 ```
 
@@ -263,7 +265,7 @@ $ kubectl apply --filename blue-green-route.yaml
 
 アクセスしてみると、何度リクエストしても`Hello blue!`が出力されすはずです。
 
-```
+```shell
 $ curl -H "Host: blue-green-demo.default.example.com" http://${IP_ADDRESS}
 Hello blue!
 ```
@@ -343,7 +345,7 @@ Hello blue!
 
 しかし、tagをつけたことでテスト用のエンドポイントが払い出され、動作確認できるようになりました。
 
-```
+```shell
 $ curl -H "Host: v2-blue-green-demo.default.example.com" http://${IP_ADDRESS}
 Hello green!
 ```
@@ -369,7 +371,7 @@ spec:
 
 変更後に適用してください。
 
-```
+```shell
 $ kubectl apply --filename blue-green-route.yaml
 ```
 
@@ -377,7 +379,7 @@ greenとblueに50%ずつトラフィックが流れます。何度かアクセ�
 
 ![](./images/revision_green_50.png)
 
-```
+```shell
 $ curl -H "Host: blue-green-demo.default.example.com" http://${IP_ADDRESS}
 Hello blue!
 ```
@@ -408,6 +410,7 @@ Eventingの責務はイベントのバインディングとデリバリーです
 つぎの図をイメージしながら進めてください。
 
 ![](./images/eventing.png)
+https://medium.com/knative/announcing-knative-v0-5-release-cfe646ca8e30
 
 ## Hello World
 
@@ -482,6 +485,11 @@ $ kubectl delete --filename cronjob-source.yaml
 ## PubSub
 
 今度は[Cloud Pub/Sub](https://cloud.google.com/pubsub/)のイベントを処理してみましょう。
+
+Cloud Pub/Subに登場する概念と、それをいかに抽象化しているかをイメージしながら追うと理解しやすいかもしれません。
+
+![](./images/pubsub.png)
+https://cloud.google.com/pubsub/docs/overview
 
 まずGCP Cloud Pub/Subをイベントソースとするためにつぎのコマンドを実行してください。
 
@@ -564,7 +572,7 @@ $ kubectl get pullsubscription -w
 
 PubSubのトピックにイベントを発行してください。メッセージはなんでも大丈夫です。
 
-```
+```shell
 $ gcloud pubsub topics publish testing --message="Hello PubSub"
 ```
 

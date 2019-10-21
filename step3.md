@@ -130,7 +130,7 @@ $ tm deploy service go-function -f ./faas --build-template faas-go-runtime --reg
 
 つぎのコマンドを実行して動作を確認してください。
 
-```
+```shell
 $ curl -H "Host: go-function.default.example.com" http://$IP_ADDRESS --data '{"Name": "Foo"}'
 ```
 

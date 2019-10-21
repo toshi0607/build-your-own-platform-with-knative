@@ -9,5 +9,7 @@
   * [Knativeの歩き方 KubernetesからServerlessを訪ねて 第2版](https://booth.pm/ja/items/1309468)
 * Knative Tutorial
   * https://github.com/meteatamel/knative-tutorial
+* Kanative Eventingベースのプロダクト
+  * [EveryBridge](https://triggermesh.com/serverless_management_platform/everybridge/)
 
 [戻る](step4.md) | [トップへ](README.md)

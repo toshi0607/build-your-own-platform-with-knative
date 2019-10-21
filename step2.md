@@ -18,7 +18,7 @@ $ tm deploy task -f https://raw.githubusercontent.com/triggermesh/knative-lambda
 
 コンテナイメージの保存はこのワークショップではGCRを利用します。GCRを利用するにあたってKubernetesの`Secret`オブジェクトの登録が必要です。つぎのコマンドを実行して一時的なアクセストークンを発行し、登録してください。
 
-```
+```shell
 $ tm set registry-auth gcr-image-puller
 # Registry: gcr.io/<your-project-id> ご自身のGCPプロジェクトIDに置き換えてください
 # Username: oauth2accesstoken
@@ -72,5 +72,7 @@ $ curl -H "Host: go-lambda.default.example.com" http://$IP_ADDRESS --data '{"Nam
 * [triggermesh/knative-lambda-runtime](https://github.com/triggermesh/knative-lambda-runtime)
 * [triggermesh/aws-custom-runtime](https://github.com/triggermesh/aws-custom-runtime)
 * [triggermesh/knative-local-registry](https://github.com/triggermesh/knative-local-registry)
+* KLRのアーキテクチャーとCustom AWS Lambda Runtimes
+  * [「Knativeで実現するKubernetes上のサーバーレスアーキテクチャ」の文字起こし #CNTD2019: ユースケース⑥　FaaS　イベントpull型](https://qiita.com/toshi0607/items/6dbdff717e1ba0aba4f6#%E3%83%A6%E3%83%BC%E3%82%B9%E3%82%B1%E3%83%BC%E3%82%B9faas%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88pull%E5%9E%8B)
 
 [戻る](step1.md) | [次へ](step3.md)

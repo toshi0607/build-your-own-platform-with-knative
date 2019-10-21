@@ -6,7 +6,7 @@
 
 早速Cloud Runをセットアップし、ServingのHello WorldワークショップでGCRにプッシュしたコンテナを実行してみましょう。
 
-```
+```shell
 # Cloud Run APIの有効化
 $ gcloud services enable run.googleapis.com
 
@@ -31,7 +31,7 @@ Service [helloworld-go] revision [helloworld-go-xxxxx] has been deployed and is 
 
 リクエストしてみましょう。
 
-```
+```shell
 # 発行されたURLで置き換えてください
 $ export HELLO_WORLD_GO_URL=https://helloworld-go-<your hello world go URL>-an.a.run.app
 $ curl $HELLO_WORLD_GO_URL
@@ -40,7 +40,7 @@ Hello World!
 
 環境変数をセットしてリクエストし直してみましょう。
 
-```
+```shell
 $ gcloud beta run services update helloworld-go --update-env-vars TARGET="Cloud Run!"
 $ curl $HELLO_WORLD_GO_URL
 Hello Cloud Run!
@@ -48,7 +48,7 @@ Hello Cloud Run!
 
 `hey`を利用して少し負荷をかけてからメトリクスを確認してみましょう。
 
-```
+```shell
 # 10秒間5並列でリクエスト
 $ hey -z 10s -c 5 $HELLO_WORLD_GO_URL
 ```
