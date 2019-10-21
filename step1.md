@@ -224,6 +224,11 @@ spec:
 $ kubectl apply --filename blue-green-config.yaml
 ```
 
+適用すると`Configuration`が登録され、`Revision`が作成されます。
+
+![](./images/revision_blue.png)
+
+
 この`Configuration`登録を登録したときに作成された`Revision`にトラフィックを流すための`Route`を登録します。
 
 まずつぎのコマンドでRevision名を取得してください。
@@ -251,6 +256,10 @@ spec:
 ```shell
 $ kubectl apply --filename blue-green-route.yaml
 ```
+
+図のようにRouteが -> Revisonの状態になります。
+
+![](./images/revision_blue_100.png)
 
 アクセスしてみると、何度リクエストしても`Hello blue!`が出力されすはずです。
 
@@ -289,6 +298,10 @@ spec:
 $ kubectl apply --filename blue-green-config.yaml
 ```
 
+環境変数TARGETがgreenのRevisionが作成されます。
+
+![](./images/revision_green.png)
+
 新しく作成された`Revison`の名前を取得してください。
 
 ```shell
@@ -320,6 +333,8 @@ $ kubectl apply --filename blue-green-route.yaml
 ```
 
 現在はまだ先に作ったgreenに100%のトラフィックが流れている状態です。
+
+![](./images/revision_green_v2.png)
 
 ```shell
 $ curl -H "Host: blue-green-demo.default.example.com" http://${IP_ADDRESS}
@@ -360,12 +375,16 @@ $ kubectl apply --filename blue-green-route.yaml
 
 greenとblueに50%ずつトラフィックが流れます。何度かアクセスして確認してみてください。
 
+![](./images/revision_green_50.png)
+
 ```
 $ curl -H "Host: blue-green-demo.default.example.com" http://${IP_ADDRESS}
 Hello blue!
 ```
 
 最終的にはgreenの`Revision`へのpercentを100、blueの`Revision`へのpercentを0にしてtag: v1をつけたらトラフィックの移行は完了です。
+
+![](./images/revision_green_100.png)
 
 確認ができたらいったん登録したKnativeのConfiguration、Routeを削除してください。
 
