@@ -1,10 +1,10 @@
 # Cloud Run
 
-ここまではGKE上にKnativeのコンポーネントをKubernetesクラスタにインストールし、プラットフォームを構築してきました。Cloud RunはKubernetesクラスタも意識することなくコンテナを実行できるKnative互換APIに基づくマネージドサービスです。
+ここまではGKEのKubernetesクラスタにKnativeのコンポーネントを自分でインストールし、プラットフォームを構築してきました。Cloud RunはKubernetesクラスタも意識することなくコンテナを実行できるKnative互換APIに基づくマネージドサービスです。
 
 ## Hello World
 
-早速Cloud Runをセットアップし、ServingのHello WorldワークショップでGCRにプッシュしたコンテナを実行してみましょう。
+早速Cloud Runをセットアップし、ServingのHello Worldワークショップで利用したhelloworld-goを実行してみましょう。
 
 ```shell
 # Cloud Run APIの有効化

@@ -1,6 +1,6 @@
 # Serving
 
-Servingの責務はオートスケールアップ・ダウン、トラフィックコントロール、バージョン管理などです。Servingは4つのコンポーネントから構成されます。
+Servingの責務はオートスケールアウト・イン、トラフィックコントロール、バージョン管理などです。Servingは4つのコンポーネントから構成されます。
 
  * Configuration: 最新の設定
  * Revision: コードと設定の履歴
@@ -606,8 +606,6 @@ Tektonの責務はKubernetes上で　CI/CDパイプラインを構築、実行�
 * Pipeline: Taskを構成要素とするCI/CDパイプライン全体を表現するオブジェクトです。
 * PipelineRun: Pipelineを実行するオブジェクトです。Pipelineがテンプレートとすると、それに具体的な値を与える実体です。TaskRunを作成してここのTaskを実行していきます。
 
-つぎの図をイメージしながら進めてください。
-
 ## Hello World
 
 [kaniko](https://github.com/GoogleContainerTools/kaniko)を利用した`Task`を使ってコンテナイメージをビルドしてレジストリにプッシュしてみましょう。
@@ -618,12 +616,12 @@ Tektonの責務はKubernetes上で　CI/CDパイプラインを構築、実行�
 $ kubectl apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/kaniko/kaniko.yaml
 ```
 
-kaniko `Task`するにあたっては`TaskRun`で2つのパラメタを設定する必要があります。
+kaniko `Task`を実行するにあたっては`TaskRun`で2つのパラメタを設定する必要があります。
 
 * DOCKERFILE: Dockerfileへのパスです。デフォルトは`./Dockerfile`
 * CONTEXT: Dockerの[ビルドコンテキスト](https://docs.docker.com/engine/reference/commandline/build/)です。デフォルトは`./`
 
-ビルドの対象とするアプリケーションはhelloworld-goです。knative/docsリポジトリにソースコードがあるのでこれをビルドし、今利用しているGCPプロジェクトのGCRにプッシュします。
+ビルドの対象とするアプリケーションはhelloworld-goです。[knative/docs](https://github.com/knative/docs/blob/master/docs/serving/samples/hello-world/helloworld-go/helloworld.go)リポジトリにソースコードがあるのでこれをビルドし、今利用しているGCPプロジェクトのGCRにプッシュします。
 
 GCRのパスをご自身のGCPプロジェクトのPROJECT_IDに変更し、`taskrun-build-kaniko-helloworld-gcr.yaml`というファイル名で保存し、適用してください。
 

@@ -134,7 +134,7 @@ $ tm deploy service go-function -f ./faas --build-template faas-go-runtime --reg
 $ curl -H "Host: go-function.default.example.com" http://$IP_ADDRESS --data '{"Name": "Foo"}'
 ```
 
-##　検討事項
+## 検討事項
 
 このワークショップでは既存のパッケージやコマンドを利用しながら簡易なFaaSプラットフォームを構築しました。
 

@@ -141,7 +141,7 @@ $ kubectl apply --filename https://github.com/knative/serving/releases/download/
    --filename https://github.com/knative/serving/releases/download/v0.9.0/monitoring.yaml
 ```
 
-つぎのコマンドを実行して確認ステータスを確認してください。すべてのPodのStatusが*Running*}*になれば設定完了です。
+つぎのコマンドを実行して確認ステータスを確認してください。すべてのPodのStatusが*Running*になれば設定完了です。
 
 ```shell
 $ kubectl get pods --namespace knative-serving
