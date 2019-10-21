@@ -59,7 +59,12 @@ https://console.cloud.google.com/run/detail/asia-northeast1/helloworld-go/metric
 
 現状ServingのAPIのすべての機能もサポートしていないベータ段階のサービスですが、順次機能追加されています。コンテナベースのアプリケーションをメインで扱っていなくても、既存のコンテナをサーバーレスなAPIにするなど触れ合う機会は増えていくかもしれません。
 
-また、GKEやオンプレミス、マルチクラウド環境などでCloud Runを構築・実行するCloud Run for Anthosもあります。
+また、GKEやオンプレミス、マルチクラウド環境などでCloud Runを構築・実行する[Cloud Run for Anthos](https://cloud.google.com/run/docs/gke/setup)もあります。
+
+GCPのサーバーレスソリューション
+
+![](./images/gcp_serverless_options.png)
+https://cloud.google.com/serverless-options/
 
 ## 参考
 
