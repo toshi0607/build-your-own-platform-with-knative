@@ -132,13 +132,13 @@ $ kubectl get nodes
 
 ```shell
 $ kubectl apply --selector knative.dev/crd-install=true \
-   --filename https://github.com/knative/serving/releases/download/v0.9.0/serving.yaml \
-   --filename https://github.com/knative/eventing/releases/download/v0.9.0/release.yaml \
-   --filename https://github.com/knative/serving/releases/download/v0.9.0/monitoring.yaml
+   --filename https://github.com/knative/serving/releases/download/v0.10.0/serving.yaml \
+   --filename https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml \
+   --filename https://github.com/knative/serving/releases/download/v0.10.0/monitoring.yaml
 
-$ kubectl apply --filename https://github.com/knative/serving/releases/download/v0.9.0/serving.yaml \
-   --filename https://github.com/knative/eventing/releases/download/v0.9.0/release.yaml \
-   --filename https://github.com/knative/serving/releases/download/v0.9.0/monitoring.yaml
+$ kubectl apply --filename https://github.com/knative/serving/releases/download/v0.10.0/serving.yaml \
+   --filename https://github.com/knative/eventing/releases/download/v0.10.0/release.yaml \
+   --filename https://github.com/knative/serving/releases/download/v0.10.0/monitoring.yaml
 ```
 
 つぎのコマンドを実行して確認ステータスを確認してください。すべてのPodのStatusが*Running*になれば設定完了です。
@@ -152,13 +152,13 @@ $ kubectl get pods --namespace knative-monitoring
 EventingでKnativeのServiceをsinkに指定する場合は現状追加でセットアップが必要です。本ワークショップをEventing含めて実施する場合はつぎのコマンドを実行してください。
 
 ```
-$ kubectl apply -f https://raw.githubusercontent.com/knative/serving/master/third_party/istio-1.2.7/istio-knative-extras.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/knative/serving/release-0.10/third_party/istio-1.2.7/istio-knative-extras.yaml
 
 # Istioのバージョン確認
 # $ kubectl get pod -n istio-system
 # istio-ingressgateway-f659695c4-sssrs
 # $ kubectl get pod istio-ingressgateway-f659695c4-sssrs -n istio-system -oyaml | grep image
-# image: gke.gcr.io/istio/proxyv2:1.1.13-gke.0
+# image: gke.gcr.io/istio/proxyv2:1.1.16-gke.0
 # => OK: 1.2.7, NG: 1.3.3
 ```
 
