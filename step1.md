@@ -259,7 +259,7 @@ spec:
 $ kubectl apply --filename blue-green-route.yaml
 ```
 
-図のようにRouteが -> Revisonの状態になります。
+図のようにRoute -> Revisonの状態になります。
 
 ![](./images/revision_blue_100.png)
 
@@ -445,7 +445,7 @@ kind: CronJobSource
 metadata:
   name: cronjob-source
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "*/2 * * * *"
   data: '{"message": "Hello Eventing!"}'
   sink:
     apiVersion: serving.knative.dev/v1alpha1
@@ -459,7 +459,7 @@ spec:
 $ kubectl apply --filename cronjob-source.yaml
 ```
 
-`CronJobSource`はspec.scheduleに記述したクロン式に従ってイベントを発行します。この例では1分毎にHello Eventing!というメッセージを発行します。
+`CronJobSource`はspec.scheduleに記述したクロン式に従ってイベントを発行します。この例では30秒毎にHello Eventing!というメッセージを発行します。
 
 KnativeのServiceで受信したメッセージはコンテナのログで確認できます。つぎのコマンドを実行してメッセージを確認してください。
 
@@ -478,7 +478,7 @@ $ kubectl delete --filename cronjob-source.yaml
 
 * 実行したアプリケーションのソースコード
   * [event_display](https://github.com/knative/eventing-contrib/blob/master/cmd/event_display/main.go)
-* Eventing v0.9でKnative Servingを利用するにあたりcluster local gatewayを別途セットアップしなければならない件
+* Eventing v0.9、0.10でKnative Servingを利用するにあたりcluster local gatewayを別途セットアップしなければならない件
   * [Cluster local issue with Knative Eventing v0.9.0](https://medium.com/google-cloud/cluster-local-issue-with-knative-eventing-v0-9-0-a1fee2215cfe)
   * https://github.com/knative/eventing/issues/1973
 
@@ -494,7 +494,7 @@ https://cloud.google.com/pubsub/docs/overview
 まずGCP Cloud Pub/Subをイベントソースとするためにつぎのコマンドを実行してください。
 
 ```shell
-$ kubectl apply -f https://github.com/google/knative-gcp/releases/download/v0.9.0/cloud-run-events.yaml
+$ kubectl apply -f https://github.com/google/knative-gcp/releases/download/v0.10.1/cloud-run-events.yaml
 ```
 
 利用しているGCPプロジェクトでCloud Pub/Sub APIを有効化してください。
@@ -552,7 +552,7 @@ $ kubectl apply --filename event-display-service.yaml
 つぎのマニフェストを`pullsubscription.yaml`という名前で保存し、適用してください。specにはPubSubのtopic名とイベントの送信先を記述しています。
 
 ```yaml
-apiVersion: pubsub.cloud.run/v1alpha1
+apiVersion: pubsub.cloud.google.com/v1alpha1
 kind: PullSubscription
 metadata:
   name: testing-source-event-display
@@ -566,8 +566,8 @@ spec:
 
 ```shell
 $ kubectl apply -f pullsubscription.yaml
-# 少し時間がかかるので注意
-$ kubectl get pullsubscription -w
+# READYがTRUEになるまで少し時間がかかるので注意
+$ kubectl get pullsubscription
 ```
 
 PubSubのトピックにイベントを発行してください。メッセージはなんでも大丈夫です。
