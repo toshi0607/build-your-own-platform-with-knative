@@ -174,6 +174,11 @@ $ curl -H "Host: go-function.default.example.com" http://$IP_ADDRESS --data '{"N
 * [cloudevents/sdk-go](https://github.com/cloudevents/sdk-go)
 * [cloudevents/sdk-goを活用したサンプル実装](https://github.com/knative/eventing-contrib/blob/master/cmd/event_display/main.go)
 
+こちらも手軽にFunctionを書けるようにするためのライブラリとして参考にしてみてください。
+
+* [Functions Framework for Go](https://github.com/GoogleCloudPlatform/functions-framework-go)
+
+
 ## 参考
 
 * [triggermesh/openfaas-runtime](https://github.com/triggermesh/openfaas-runtime)
