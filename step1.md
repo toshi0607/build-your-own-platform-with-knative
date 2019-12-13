@@ -94,6 +94,8 @@ $ kubectl delete -f service.yaml
   * [helloworld.go](https://github.com/knative/docs/blob/master/docs/serving/samples/hello-world/helloworld-go/helloworld.go)
 * Knativeを利用せずに、Kubernetesの組み込みオブジェクトでknative Serviceを構築する場合との比較
   * [Migrating from Kubernetes Deployment to Knative Serving](https://medium.com/google-cloud/migrating-from-kubernetes-deployment-to-knative-serving-bdc45ef1bb9e)
+* [Knative = Kubernetes Networking++の全訳](https://qiita.com/toshi0607/items/45403965beaa5bd1f8ca)
+  * Knativeはサーバーレスのビルディングブロックであるという文脈でで説明されることが多く、本来メリットを受けることができるはずのKubernetes上のアプリケーションやマイクロサービスの開発者、運用・管理者などに便利な機能が伝わってないという話があるようです。
 
 ## オートスケール
 
