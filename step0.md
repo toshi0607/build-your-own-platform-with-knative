@@ -172,7 +172,7 @@ cf. [issue#1973](https://github.com/knative/eventing/issues/1973)
 $ kubectl apply --filename https://storage.googleapis.com/tekton-releases/latest/release.yaml
 ```
 
-つぎのコマンドを実行して確認ステータスを確認してください。すべてのPodのStatusが*Running*}*になれば設定完了です。
+つぎのコマンドを実行して確認ステータスを確認してください。すべてのPodのStatusが*Running*になれば設定完了です。
 
 ```
 $ kubectl get pods --namespace tekton-pipelines
